@@ -19,19 +19,8 @@ class ClockIn:
 
         self.employee_count = 0
 
-        pass
-
-    def sheetdate(self):
-        """
-        填入考勤日期和制表时间
-        :return:
-        """
-
-        sheet = self.kqbb.sheet_by_index(2)
-        kq_date = sheet.cell_value(1, 33)
-        zb_date = sheet.cell_value(1, 34)
-
-
+        self.sheet = self.kqbb.sheet_by_index(2)
+        self.monthdays = int(self.sheet.cell_value(4,1)[-2:])
         pass
 
     def employee(self):
@@ -44,9 +33,11 @@ class ClockIn:
         def onjob(sheet, which_employee):
             workday = 0
             notworkday = 0
+            # try:
+
             if which_employee is 1:
                 start_index = (12,1)
-                end_index = (42, 12)
+                end_index = (self.monthdays+11, 12)
                 # 遍历所有的时间点
                 for row in range(start_index[0], end_index[0]+1):
                     morning_sb = sheet.cell_value(row, 1)
@@ -65,12 +56,12 @@ class ClockIn:
                     else:
                         notworkday+=1
 
-                    if notworkday==31:
+                    if notworkday==self.monthdays:
                         return False, workday
                 return True, workday
             elif which_employee is 2:
                 start_index = (12,16)
-                end_index = (42, 27)
+                end_index = (self.monthdays+11, 27)
                 # 遍历所有的时间点
                 for row in range(start_index[0], end_index[0]+1):
                     morning_sb = sheet.cell_value(row, 16)
@@ -89,12 +80,12 @@ class ClockIn:
                     else:
                         notworkday+=1
 
-                    if notworkday==31:
+                    if notworkday==self.monthdays:
                         return False, workday
                 return True, workday
             elif which_employee is 3:
                 start_index = (12,31)
-                end_index = (42, 42)
+                end_index = (self.monthdays+11, 42)
                 # 遍历所有的时间点
                 for row in range(start_index[0], end_index[0]+1):
                     morning_sb = sheet.cell_value(row, 31)
@@ -113,11 +104,13 @@ class ClockIn:
                     else:
                         notworkday+=1
 
-                    if notworkday==31:
+                    if notworkday==self.monthdays:
                         return False, workday
                 return True, workday
             else:
                 return None, None
+            # except:
+            #     return None, None
 
 
 
@@ -139,19 +132,19 @@ class ClockIn:
 
             if which_employee == 1:
                 start_index = (12,1)
-                end_index = (42, 12)
+                end_index = (self.monthdays+11, 12)
                 employeeName = sheet.cell_value(3, 9)
                 workNum = sheet.cell_value(4, 9)
                 timeCol = [1, 3, 6, 8, 10, 12]
             elif which_employee == 2:
                 start_index = (12,16)
-                end_index = (42, 27)
+                end_index = (self.monthdays+11, 27)
                 employeeName = sheet.cell_value(3, 24)
                 workNum = sheet.cell_value(4, 24)
                 timeCol = [16, 18, 21, 23, 25, 27]
             elif which_employee == 3:
                 start_index = (12,20)
-                end_index = (42, 31)
+                end_index = (self.monthdays+11, 31)
                 employeeName = sheet.cell_value(3, 39)
                 workNum = sheet.cell_value(4, 39)
                 timeCol = [31, 33, 36, 38, 40, 42]
@@ -212,7 +205,7 @@ class ClockIn:
 
         # 从左向右分别读取三位员工的基本信息
         index = 0
-        for sheetIndex in range(2, 21):
+        for sheetIndex in range(2, 22):
             sheet = self.kqbb.sheet_by_index(sheetIndex)
             index+=1
             # 第一位员工
@@ -220,11 +213,13 @@ class ClockIn:
             if isonjob_1:
                 self.employee_data[f"{index}"] = EmployeeData(sheet, 1)
                 self.employee_data[f"{index}"]["workday"] = workday
+                index+=1
             # 第二位员工
             isonjob_2, workday = onjob(sheet, 2)
             if isonjob_2:
                 self.employee_data[f"{index}"] = EmployeeData(sheet, 2)
                 self.employee_data[f"{index}"]["workday"] = workday
+                index+=1
             # 第三位员工
             isonjob_3, workday = onjob(sheet, 3)
             print(f"{isonjob_3}")
@@ -232,8 +227,10 @@ class ClockIn:
             if isonjob_3:
                 self.employee_data[f"{index}"] = EmployeeData(sheet, 3)
                 self.employee_data[f"{index}"]["workday"] = workday
+                index+=1
             self.employee_data['kqrq'] = sheet.cell_value(1, 33)
             self.employee_data['zbsj'] = sheet.cell_value(2, 33)
+            self.employee_data['monthdays'] = self.monthdays
         return self.employee_data
 
     def run(self):

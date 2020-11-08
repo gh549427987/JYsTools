@@ -3,7 +3,6 @@
 # @Author  : 蟹蟹 ！！
 # @FileName: test.py
 # @Software: PyCharm
-
 import xlwt
 workbook = xlwt.Workbook()
 worksheet = workbook.add_sheet('员工刷卡记录')
@@ -50,7 +49,7 @@ ai = worksheet.col(33)
 ak = worksheet.col(34)
 al = worksheet.col(35)
 
-a.width = 256*6
+a.width = 0
 b.width = 256*6
 c.width = 256*6
 d.width = 256*6
@@ -110,23 +109,31 @@ style_title.alignment = alignment_title
 # 获取数据
 from Clockin import ClockIn
 data = ClockIn().employee()
+print(data)
 worksheet.write_merge(0, 4, 8, 23, '员 工 刷 卡 记 录 表', style_title)
+
 worksheet.write_merge(2, 2 , 25,31, data['kqrq'])
 worksheet.write_merge(3, 3, 25,31, data['zbsj'])
 
-row_first_index = 0
+row_first_index = 1
 input_data = ''
-third_row_index = 2
+third_row_index = 3
+
+import traceback
 try:
     # 遍历每个员工
     for j in data.keys():  # 第一个员工
         dayEachMember = 0
-        if j == 'kqrq' or j == 'zbsj':
+        if j == 'kqrq' or j == 'zbsj' or j == 'monthdays':
             continue
         print(f"第{j}个员工打卡时间录入。。。")
 
-        row_first_index += 5
-        third_row_index += 5
+        # region 确认最大行高
+
+        # endregion
+
+        row_first_index += 4
+        third_row_index += 4
 
         # region 行高设置
         # 设置行高
@@ -259,11 +266,13 @@ try:
 
         # region 第二行数据
         second_row = worksheet.row(row_first_index+1)
-        second_height = xlwt.easyxf('font:height 500;')
+        second_height = xlwt.easyxf('font:height 250;')
         second_row.set_style(second_height)
         for i in range(1,34):
             # 第一个的话
             if i == 1:
+                font_second_row = xlwt.Font()
+                font_second_row.height = 20*9
                 borders_second_row = xlwt.Borders()
                 borders_second_row.left = 5
                 borders_second_row.bottom = 2
@@ -271,27 +280,46 @@ try:
                 borders_second_row.left_colour = color.LIGHT_BLUE
                 borders_second_row.bottom_colour = color.LIGHT_PINK
                 borders_second_row.right_colour = color.LIGHT_PINK
+                alignment_second_row = xlwt.Alignment()
+                alignment_second_row.vert = 0x02 # 0x00(上端对齐)、 0x01(垂直方向上居中对齐)、0x02(底端对齐)
                 style_second_row = xlwt.XFStyle()
                 style_second_row.borders = borders_second_row
+                style_second_row.alignment = alignment_second_row
+                style_second_row.font = font_second_row
 
-            # 最后一个
+
+        # 最后一个
             elif i == 33:
+                font_second_row = xlwt.Font()
+                font_second_row.height = 20*9
                 borders_second_row = xlwt.Borders()
                 borders_second_row.bottom = 2
                 borders_second_row.right = 5
                 borders_second_row.bottom_colour = color.LIGHT_PINK
                 borders_second_row.right_colour = color.LIGHT_BLUE
+                alignment_second_row = xlwt.Alignment()
+                alignment_second_row.vert = 0x02 # 0x00(上端对齐)、 0x01(垂直方向上居中对齐)、0x02(底端对齐)
                 style_second_row = xlwt.XFStyle()
                 style_second_row.borders = borders_second_row
+                style_second_row.alignment = alignment_second_row
+                style_second_row.font = font_second_row
+
+
             else:
                 # 第二个以及以后
+                font_second_row = xlwt.Font()
+                font_second_row.height = 20*9
                 borders_second_row = xlwt.Borders()
                 borders_second_row.bottom = 2
                 borders_second_row.right = 2
                 borders_second_row.bottom_colour = color.LIGHT_PINK
                 borders_second_row.right_colour = color.LIGHT_PINK
+                alignment_second_row = xlwt.Alignment()
+                alignment_second_row.vert = 0x02 # 0x00(上端对齐)、 0x01(垂直方向上居中对齐)、0x02(底端对齐)
                 style_second_row = xlwt.XFStyle()
                 style_second_row.borders = borders_second_row
+                style_second_row.alignment = alignment_second_row
+                style_second_row.font = font_second_row
 
             if i == 32 :
                 style_second_row.alignment.wrap = 1
@@ -308,22 +336,32 @@ try:
 
         while True:
             dayEachMember+=1
-            if dayEachMember <= 31:
+            max_height = 0
+            if dayEachMember <= data["monthdays"]:
                 ct_list = data[j][f'day_{dayEachMember}'] # 获取第1天数据
+                ct_list_height = len(ct_list) #判断最大行高
+                if ct_list_height > max_height:
+                    max_height = ct_list_height
                 input_data = "\n".join(ct_list)
+            elif 32 > dayEachMember > data["monthdays"]:
+                input_data=""
             elif dayEachMember in [32, 33]:
                 pass
+            elif dayEachMember > 33:
+                break
             else:
                 break
 
 
             # 填入打卡时间/上班天数/加班时间
             third_row = worksheet.row(row_first_index+2)
-            third_height = xlwt.easyxf('font:height 1000;')
+            third_height = xlwt.easyxf(f'font:height {max_height*167};')
             third_row.set_style(third_height)
             #   筛选应该选用什么样的style
             # 第一个的话
             if dayEachMember == 1:
+                font_third_row = xlwt.Font()
+                font_third_row.height = 20*8
                 borders_third_row = xlwt.Borders()
                 borders_third_row.left = 5
                 borders_third_row.bottom = 2
@@ -331,38 +369,65 @@ try:
                 borders_third_row.left_colour = color.LIGHT_BLUE
                 borders_third_row.bottom_colour = color.LIGHT_PINK
                 borders_third_row.right_colour = color.LIGHT_PINK
+                alignment_third_row = xlwt.Alignment()
+                alignment_third_row.wrap = 1#设置自动换行
+                alignment_third_row.vert = 0x00 # 0x00(上端对齐)、 0x01(垂直方向上居中对齐)、0x02(底端对齐)
                 style_third_row = xlwt.XFStyle()
-                style_third_row.alignment.wrap = 1  #设置自动换行
                 style_third_row.borders = borders_third_row
+                style_third_row.alignment = alignment_third_row
+                style_third_row.font = font_third_row
+
             elif dayEachMember == 33:
+                font_third_row = xlwt.Font()
+                font_third_row.height = 20*8
                 borders_third_row = xlwt.Borders()
                 borders_third_row.bottom = 2
                 borders_third_row.right = 5
                 borders_third_row.bottom_colour = color.LIGHT_PINK
                 borders_third_row.right_colour = color.LIGHT_BLUE
+                alignment_third_row = xlwt.Alignment()
+                alignment_third_row.vert = 0x00 # 0x00(上端对齐)、 0x01(垂直方向上居中对齐)、0x02(底端对齐)
+                alignment_third_row.horz = 0x01
+                alignment_third_row.wrap = 1#设置自动换行
                 style_third_row = xlwt.XFStyle()
-                style_third_row.alignment.wrap = 1  #设置自动换行
                 style_third_row.borders = borders_third_row
+                style_third_row.alignment = alignment_third_row
+                style_third_row.font = font_third_row
+
             elif dayEachMember == 32:
                 # 倒数第二个
+                font_third_row = xlwt.Font()
+                font_third_row.height = 20*8
                 borders_third_row = xlwt.Borders()
                 borders_third_row.bottom = 2
                 borders_third_row.right = 2
                 borders_third_row.bottom_colour = color.LIGHT_PINK
                 borders_third_row.right_colour = color.LIGHT_PINK
+                alignment_third_row = xlwt.Alignment()
+                alignment_third_row.wrap = 1#设置自动换行
+                alignment_third_row.vert = 0x00 # 0x00(上端对齐)、 0x01(垂直方向上居中对齐)、0x02(底端对齐)
+                alignment_third_row.horz = 0x01
                 style_third_row = xlwt.XFStyle()
-                style_third_row.alignment.wrap = 1  #设置自动换行
                 style_third_row.borders = borders_third_row
+                style_third_row.alignment = alignment_third_row
+                style_third_row.font = font_third_row
+
             else:
                 # 第二个以及以后
+                font_third_row = xlwt.Font()
+                font_third_row.height = 20*8
                 borders_third_row = xlwt.Borders()
                 borders_third_row.bottom = 2
                 borders_third_row.right = 2
                 borders_third_row.bottom_colour = color.LIGHT_PINK
                 borders_third_row.right_colour = color.LIGHT_PINK
+                alignment_third_row = xlwt.Alignment()
+                alignment_third_row.wrap = 1#设置自动换行
+                alignment_third_row.vert = 0x00 # 0x00(上端对齐)、 0x01(垂直方向上居中对齐)、0x02(底端对齐)
                 style_third_row = xlwt.XFStyle()
-                style_third_row.alignment.wrap = 1  #设置自动换行
                 style_third_row.borders = borders_third_row
+                style_third_row.alignment = alignment_third_row
+                style_third_row.font = font_third_row
 
 
             # 录入所有的打卡时间
@@ -370,6 +435,7 @@ try:
                 print(f"第{dayEachMember}天录入")
                 worksheet.write(third_row_index, dayEachMember, input_data, style_third_row)
             elif dayEachMember == 32:
+                alignment_workday = xlwt.Alignment()
                 worksheet.write(third_row_index, dayEachMember, data[j]['workday'], style_third_row)
             elif dayEachMember == 33 :
                 worksheet.write(third_row_index, dayEachMember, '', style_third_row)
@@ -377,13 +443,20 @@ try:
                 worksheet.write(third_row_index, dayEachMember, '', style_third_row)
                 print(f"第{dayEachMember}天没有打卡时间")
                 continue
-            from time import strftime, localtime
+        #endregion
 
-            filename = strftime("%Y年%m月员工刷卡记录表", localtime())
-            workbook.save(filename)
+    from time import strftime, localtime
+
+    # filename = strftime("%Y年%m月员工刷卡记录表.xls", localtime())
+    import os
+    import random
+    import time
+    ddd = time.time()
+    filename = f"{ddd}{data['kqrq'][5:9]}年{data['kqrq'][10:12]}月员工刷卡记录表.xls"
+    workbook.save(filename)
+    os.system(f"open {filename}")
 
 except:
     workbook.save('Merge_cell.xls')
+    traceback.print_exc()
 
-import os
-os.system(f"open {filename}")
