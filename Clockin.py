@@ -15,7 +15,7 @@ class ClockIn:
     def __init__(self):
 
         self.kqbb = xlrd.open_workbook(kqbb_xlsxpath)
-        self.jlb = xlrd.open_workbook(new_xlsx)
+        # self.jlb = xlrd.open_workbook(new_xlsx)
 
         self.employee_count = 0
 

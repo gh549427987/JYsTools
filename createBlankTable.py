@@ -121,6 +121,11 @@ third_row_index = 3
 
 import traceback
 try:
+
+    row_first_height_style = xlwt.easyxf('font:height 500;')
+    second_height = xlwt.easyxf('font:height 250;')
+    third_height = xlwt.easyxf(f'font:height 500;')
+    # third_height = xlwt.easyxf(f'font:height {max_height*167};')
     # 遍历每个员工
     for j in data.keys():  # 第一个员工
         dayEachMember = 0
@@ -138,7 +143,7 @@ try:
         # region 行高设置
         # 设置行高
         row_first = worksheet.row(row_first_index)
-        row_first_height_style = xlwt.easyxf('font:height 500;')
+
         row_first.set_style(row_first_height_style)
         #endregion
 
@@ -266,7 +271,7 @@ try:
 
         # region 第二行数据
         second_row = worksheet.row(row_first_index+1)
-        second_height = xlwt.easyxf('font:height 250;')
+
         second_row.set_style(second_height)
         for i in range(1,34):
             # 第一个的话
@@ -355,7 +360,7 @@ try:
 
             # 填入打卡时间/上班天数/加班时间
             third_row = worksheet.row(row_first_index+2)
-            third_height = xlwt.easyxf(f'font:height {max_height*167};')
+
             third_row.set_style(third_height)
             #   筛选应该选用什么样的style
             # 第一个的话
@@ -428,7 +433,6 @@ try:
                 style_third_row.borders = borders_third_row
                 style_third_row.alignment = alignment_third_row
                 style_third_row.font = font_third_row
-
 
             # 录入所有的打卡时间
             if input_data is not '' and dayEachMember != 33 and dayEachMember != 32:
